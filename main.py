@@ -3,7 +3,8 @@ from fastapi.responses import Response
 from fastapi import Form
 from fastapi import Body
 import psycopg2
-
+from app.login import *
+from app.registration import *
 
 
 
@@ -17,22 +18,36 @@ def index():
     return Response(index_page, media_type= "text/html")
 
 
-
 @app.post("/login")
 def login(username= Form(...), password= Form(...)):
-    with psycopg2.connect(dbname="xpeH", user="postgres", password= "1234", host= "127.0.0.1") as conn:
-        with conn.cursor() as cur:
-            try:
-                cur.execute(f"SELECT userName FROM registerUsers WHERE userName = '{username}';")
-                name = cur.fetchone()[0]                
-            except(TypeError):
-                return Response("Пользователь не найден", media_type= "text/html")     #???????????????????user не найден
-          
-            cur.execute(f"SELECT hash FROM registerUsers WHERE username = '{name}';")
-            hash = cur.fetchone()[0]            
-            if hash != password:
-                return Response("Неверный пароль!", media_type= "text/html")     #???????????????????пароль не верный
-        
-    with open("templates/login.html", "r") as f:
-        login_page = f.read().format(username, password)
-    return Response(login_page, media_type= "text/html")
+    if checkingUsernameAndPassword(username, password) == "user не найден":
+        return Response("User не найден", media_type= "text/html")
+    elif checkingUsernameAndPassword(username, password) == "пароль не верный":
+        return Response("Пароль не верный", media_type= "text/html")
+    else:
+        with open("templates/login.html", "r") as f:
+            login_page = f.read().format(username)
+            response = Response(login_page, media_type= "text/html")
+            return response.set_cookie(key= 'username', value= username)
+
+@app.get("/registretion")
+def registretion():
+    with open("templates/registretion.html", "r") as f:
+        registretion_page = f.read()
+    return Response(registretion_page, media_type= "text/html")
+
+
+@app.post("/completereg")
+def completeReg(username= Form(...), password= Form(...)):
+    includingUsernameAndPasswordInBase(username, password)
+
+    with open("templates/successful_reg.html", "r") as f:
+        congretulationsPage = f.read()
+    return Response(congretulationsPage, media_type= "text/html")
+
+
+@app.post("/successAdd")
+def successAdd(expenses= Form(...)):
+    return Response(f"{expenses}", media_type= "text/html")
+
+    

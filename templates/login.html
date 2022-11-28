@@ -7,7 +7,13 @@
     <title>Login</title>
 </head>
 <body>
-    <p>Логин: {0}</p>
-    <p>Пароль: {1}</p>
+    <h2>Привет {0}!</h2>
+    <form method="post" action="/successAdd">
+        <input type="text" name="expenses"/>
+        <input type="submit" value="Добавить"/>
+    </form>
+    <form action="/conclusion">
+        <button type="submit">Вывести</button>
+    </form>
 </body>
 </html>
