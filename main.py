@@ -7,6 +7,7 @@ import psycopg2
 
 
 
+
 app = FastAPI()
 
 @app.get("/")
