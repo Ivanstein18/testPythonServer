@@ -1,10 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Form, Cookie
 from fastapi.responses import Response
-from fastapi import Form
-from fastapi import Body
 import psycopg2
 from app.login import *
 from app.registration import *
+from app.general import *
 
 
 
@@ -12,10 +11,20 @@ from app.registration import *
 app = FastAPI()
 
 @app.get("/")
-def index():
+def index(usernameS= Cookie(default=None)):
     with open("templates/index.html", "r") as f:
         index_page = f.read()
-    return Response(index_page, media_type= "text/html")
+    if usernameS:
+        if check_valid_sign_data(usernameS):
+            username = username_from_usernameS(usernameS)
+            with open("templates/login.html", "r") as f:
+                login_page = f.read().format(username)
+            return Response(login_page, media_type= "text/html")
+        else:
+            respons = Response(index_page, media_type= "text/html")
+            return respons.delete_cookie(key= "usernameS")
+    else:        
+        return Response(index_page, media_type= "text/html")
 
 
 @app.post("/login")
@@ -27,8 +36,9 @@ def login(username= Form(...), password= Form(...)):
     else:
         with open("templates/login.html", "r") as f:
             login_page = f.read().format(username)
-            response = Response(login_page, media_type= "text/html")
-            return response.set_cookie(key= 'username', value= username)
+        response = Response(login_page, media_type= "text/html")
+        response.set_cookie(key= 'usernameS', value= sign_cookie(username))
+        return response
 
 @app.get("/registretion")
 def registretion():
