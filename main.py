@@ -28,7 +28,9 @@ def index(usernameS= Cookie(default=None)):
 
 
 @app.post("/login")
-def login(username= Form(...), password= Form(...)):
+def login(username= Form(default= "undefined"), password= Form(default= "undefined")):
+    if username or password == "undefined":
+        return Response("Вы оставили поле пустым", media_type= "text/html")
     if checkingUsernameAndPassword(username, password) == "user не найден":
         return Response("User не найден", media_type= "text/html")
     elif checkingUsernameAndPassword(username, password) == "пароль не верный":

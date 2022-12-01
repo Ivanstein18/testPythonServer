@@ -1,4 +1,4 @@
-from .secret_key import SECRET_KEY
+from .secret_const import SECRET_KEY, PASSWORD_SALT
 import hmac, hashlib, base64
 
 
@@ -15,8 +15,7 @@ def data_b64_decode(data_b64_encode):
     return decode
 
 def check_valid_sign_data(usernameS):
-    print(usernameS)
-    usernameB64, sign = usernameS.split(".")#?????????????????????????????????????????????
+    usernameB64, sign = usernameS.split(".")
     username = data_b64_decode(usernameB64)
     check = hmac.compare_digest(sign, sign_data(username))
     if check:
@@ -25,10 +24,15 @@ def check_valid_sign_data(usernameS):
         return False
 
 def username_from_usernameS(usernameS):
-    usernameB64, sign = usernameS.split()
+    usernameB64, sign = usernameS.split(".")
     username = data_b64_decode(usernameB64)
     return username
 
 def sign_cookie(username):
     sign_cookie = f"{data_b64_encode(username)}.{sign_data(username)}"
     return sign_cookie
+
+
+def hashing_password(password, salt= PASSWORD_SALT):
+    hashing_password = hashlib.sha256((f'{password}+{salt}').encode()).hexdigest()
+    return hashing_password
