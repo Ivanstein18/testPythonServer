@@ -29,7 +29,7 @@ def index(usernameS= Cookie(default=None)):
 
 @app.post("/login")
 def login(username= Form(default= "undefined"), password= Form(default= "undefined")):
-    if username or password == "undefined":
+    if (username or password) == "undefined":
         return Response("Вы оставили поле пустым", media_type= "text/html")
     if checkingUsernameAndPassword(username, password) == "user не найден":
         return Response("User не найден", media_type= "text/html")
@@ -50,12 +50,14 @@ def registretion():
 
 
 @app.post("/completereg")
-def completeReg(username= Form(...), password= Form(...)):
-    includingUsernameAndPasswordInBase(username, password)
-
-    with open("templates/successful_reg.html", "r") as f:
-        congretulationsPage = f.read()
-    return Response(congretulationsPage, media_type= "text/html")
+def completeReg(username= Form(default= "undefined"), password= Form(default= "undefined")):
+    if (username or password) == "undefined":
+        return Response("Вы оставили поле пустым", media_type= "text/html")
+    else:
+        includingUsernameAndPasswordInBase(username, password)
+        with open("templates/successful_reg.html", "r") as f:
+            congretulationsPage = f.read()
+        return Response(congretulationsPage, media_type= "text/html")
 
 
 @app.post("/successAdd")
