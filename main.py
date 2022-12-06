@@ -16,7 +16,7 @@ def index(usernameS= Cookie(default=None)):
         index_page = f.read()
     if usernameS:
         if check_valid_sign_data(usernameS):
-            username = username_from_usernameS(usernameS)
+            username = get_username_from_usernameS(usernameS)
             with open("templates/login.html", "r") as f:
                 login_page = f.read().format(username)
             return Response(login_page, media_type= "text/html")
@@ -61,7 +61,82 @@ def completeReg(username= Form(default= "undefined"), password= Form(default= "u
 
 
 @app.post("/successAdd")
-def successAdd(expenses= Form(...)):
-    return Response(f"{expenses}", media_type= "text/html")
+def successAdd(expenses= Form(...), usernameS= Cookie(default=None)):
+    if usernameS:        
+        if check_valid_sign_data(usernameS):
+            username = get_username_from_usernameS(usernameS)
+            try:
+                with psycopg2.connect(dbname="xpeH", user="postgres", password= "1234", host= "127.0.0.1") as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(f"SELECT expenses FROM registerusers WHERE username='{username}';")
+                        user_expenses = cur.fetchone()[0]
+                        if not user_expenses:
+                            cur.execute(f"UPDATE registerusers SET expenses='{expenses}' WHERE username='{username}';")
+                        else:
+                            cur.execute(f"UPDATE registerusers SET expenses='{str(int(user_expenses) + int(expenses))}' WHERE username='{username}';")
+                    conn.commit()
 
-    
+                with open("templates/successful_add.html", "r") as f:
+                    successful_add_page = f.read()
+                return Response(successful_add_page, media_type= "text/html")
+            except Exception as e:
+                print(str(e))
+                with open("templates/oops.html", "r") as f:
+                    oops_page = f.read()
+                return Response(oops_page, media_type= "text/html")
+    else:
+        with open("templates/index.html", "r") as f:
+            index_page = f.read()
+        return Response(index_page, media_type= "text/html")
+
+
+@app.get("/conclusion")
+def conclusion(usernameS= Cookie(default=None)):
+    if usernameS:        
+        if check_valid_sign_data(usernameS):
+            username = get_username_from_usernameS(usernameS)
+            try:
+                with psycopg2.connect(dbname="xpeH", user="postgres", password= "1234", host= "127.0.0.1") as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(f"SELECT expenses FROM registerusers WHERE username='{username}';")
+                        user_expenses = cur.fetchone()[0]
+                        if not user_expenses:
+                            user_expenses == 0
+                with open("templates/conclusion.html", "r") as f:
+                    conclusion_page = f.read().format(username, user_expenses)
+                return Response(conclusion_page, media_type= "text/html")
+
+            except Exception as e:
+                print(str(e))
+                with open("templates/oops.html", "r") as f:
+                    oops_page = f.read()
+                return Response(oops_page, media_type= "text/html")
+    else:
+        with open("templates/index.html", "r") as f:
+            index_page = f.read()
+        return Response(index_page, media_type= "text/html")
+
+
+@app.get("/nullify")
+def nullify(usernameS= Cookie(default=None)):
+    if usernameS:        
+        if check_valid_sign_data(usernameS):
+            username = get_username_from_usernameS(usernameS)
+            try:
+                with psycopg2.connect(dbname="xpeH", user="postgres", password= "1234", host= "127.0.0.1") as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(f"UPDATE registerusers SET expenses='0' WHERE username='{username}';")
+                conn.commit()
+                with open("templates/nullify.html", "r") as f:
+                    nullify_page = f.read()
+                return Response(nullify_page, media_type= "text/html")
+
+            except Exception as e:
+                print(str(e))
+                with open("templates/oops.html", "r") as f:
+                    oops_page = f.read()
+                return Response(oops_page, media_type= "text/html")
+    else:
+        with open("templates/index.html", "r") as f:
+            index_page = f.read()
+        return Response(index_page, media_type= "text/html")

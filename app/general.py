@@ -23,7 +23,7 @@ def check_valid_sign_data(usernameS):
     else:
         return False
 
-def username_from_usernameS(usernameS):
+def get_username_from_usernameS(usernameS):
     usernameB64, sign = usernameS.split(".")
     username = data_b64_decode(usernameB64)
     return username
