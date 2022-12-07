@@ -1,4 +1,6 @@
 from .secret_const import SECRET_KEY, PASSWORD_SALT
+from fastapi.responses import Response
+from fastapi import Form, Cookie
 import hmac, hashlib, base64
 
 
@@ -36,3 +38,28 @@ def sign_cookie(username):
 def hashing_password(password, salt= PASSWORD_SALT):
     hashing_password = hashlib.sha256((f'{password}+{salt}').encode()).hexdigest()
     return hashing_password
+
+
+def decorate_with_Form_Cookie(func):
+    def wrapper(expenses= Form(default= "undefined"), usernameS= Cookie(default=None)): 
+        if usernameS:        
+            if check_valid_sign_data(usernameS):
+                res = func(expenses, usernameS)
+        else:
+            with open("templates/index.html", "r") as f:
+                index_page = f.read()
+            return Response(index_page, media_type= "text/html")
+        return res
+    return wrapper
+
+def decorate_with_Cookie(func):
+    def wrapper(usernameS= Cookie(default=None)): 
+        if usernameS:        
+            if check_valid_sign_data(usernameS):
+                res = func(usernameS)
+        else:
+            with open("templates/index.html", "r") as f:
+                index_page = f.read()
+            return Response(index_page, media_type= "text/html")
+        return res
+    return wrapper
