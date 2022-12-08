@@ -1,7 +1,8 @@
 from .secret_const import SECRET_KEY, PASSWORD_SALT
+from app.customization_const import DBNAME, DBUSER, DBPASSWORD, DBHOST
 from fastapi.responses import Response
 from fastapi import Form, Cookie
-import hmac, hashlib, base64
+import hmac, hashlib, base64, psycopg2
 
 
 def sign_data(data):
@@ -63,3 +64,8 @@ def decorate_with_Cookie(func):
             return Response(index_page, media_type= "text/html")
         return res
     return wrapper
+
+
+def connect_database_create(dbname= DBNAME, user= DBUSER, password= DBPASSWORD, host= DBHOST):
+    with psycopg2.connect(dbname= dbname, user= user, password= password, host= host) as conn:
+        return conn
