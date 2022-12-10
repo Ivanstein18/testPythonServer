@@ -66,65 +66,53 @@ def successAdd(expenses= Form(default= "undefined"), usernameS= Cookie(default=N
     if expenses == "undefined":
         return Response("Вы оставили поле пустым", media_type= "text/html")
     username = get_username_from_usernameS(usernameS)
-    try:
-        conn = connect_database_create()
-        with conn.cursor() as cur:
-            cur.execute(f"SELECT expenses FROM registerusers WHERE username='{username}';")
-            user_expenses = cur.fetchone()[0]
-            if not user_expenses:
-                cur.execute(f"UPDATE registerusers SET expenses='{expenses}' WHERE username='{username}';")
-            else:
-                cur.execute(f"UPDATE registerusers SET expenses='{str(int(user_expenses) + int(expenses))}' WHERE username='{username}';")
-            conn.commit()
-        with open("templates/successful_add.html", "r") as f:
-            successful_add_page = f.read()
-        return Response(successful_add_page, media_type= "text/html")
-    except Exception as e:
-        print(str(e))
-        with open("templates/oops.html", "r") as f:
-            oops_page = f.read()
-        return Response(oops_page, media_type= "text/html")
+
+    conn = connect_database_create()
+    with conn.cursor() as cur:
+        cur.execute(f"SELECT expenses FROM registerusers WHERE username='{username}';")
+        user_expenses = cur.fetchone()[0]
+        if not user_expenses:
+            cur.execute(f"UPDATE registerusers SET expenses='{expenses}' WHERE username='{username}';")
+        else:
+            cur.execute(f"UPDATE registerusers SET expenses='{str(int(user_expenses) + int(expenses))}' WHERE username='{username}';")
+        conn.commit()
+    with open("templates/successful_add.html", "r") as f:
+        successful_add_page = f.read()
+    return Response(successful_add_page, media_type= "text/html")
+    
 
 
 @app.get("/conclusion")
 @decorate_with_Cookie
 def conclusion(usernameS= Cookie(default=None)):
     username = get_username_from_usernameS(usernameS)
-    try:
-        conn = connect_database_create()
-        with conn.cursor() as cur:
-            cur.execute(f"SELECT expenses FROM registerusers WHERE username='{username}';")
-            user_expenses = cur.fetchone()[0]
-            if not user_expenses:
-                user_expenses == 0
-        with open("templates/conclusion.html", "r") as f:
-            conclusion_page = f.read().format(username, user_expenses)
-        return Response(conclusion_page, media_type= "text/html")
-    except Exception as e:
-        print(str(e))
-        with open("templates/oops.html", "r") as f:
-            oops_page = f.read()
-        return Response(oops_page, media_type= "text/html")
+
+    conn = connect_database_create()
+    with conn.cursor() as cur:
+        cur.execute(f"SELECT expenses FROM registerusers WHERE username='{username}';")
+        user_expenses = cur.fetchone()[0]
+        if not user_expenses:
+            user_expenses == 0
+    with open("templates/conclusion.html", "r") as f:
+        conclusion_page = f.read().format(username, user_expenses)
+    return Response(conclusion_page, media_type= "text/html")
+    
 
 
 @app.get("/nullify")
 @decorate_with_Cookie
 def nullify(usernameS= Cookie(default=None)):
     username = get_username_from_usernameS(usernameS)
-    try:
-        conn = connect_database_create()
-        with conn.cursor() as cur:
-            cur.execute(f"UPDATE registerusers SET expenses='0' WHERE username='{username}';")
-        conn.commit()
-        with open("templates/nullify.html", "r") as f:
-            nullify_page = f.read()
-        response = Response(nullify_page, media_type= "text/html")
-        return response
-    except Exception as e:
-        print(str(e))
-        with open("templates/oops.html", "r") as f:
-            oops_page = f.read()
-        return Response(oops_page, media_type= "text/html")
+
+    conn = connect_database_create()
+    with conn.cursor() as cur:
+        cur.execute(f"UPDATE registerusers SET expenses='0' WHERE username='{username}';")
+    conn.commit()
+    with open("templates/nullify.html", "r") as f:
+        nullify_page = f.read()
+    response = Response(nullify_page, media_type= "text/html")
+    return response
+    
 
 
 

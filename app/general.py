@@ -67,5 +67,11 @@ def decorate_with_Cookie(func):
 
 
 def connect_database_create(dbname= DBNAME, user= DBUSER, password= DBPASSWORD, host= DBHOST):
-    with psycopg2.connect(dbname= dbname, user= user, password= password, host= host) as conn:
-        return conn
+    try:
+        with psycopg2.connect(dbname= dbname, user= user, password= password, host= host) as conn:
+            return conn
+    except Exception as e:
+        print(str(e))
+        with open("templates/oops.html", "r") as f:
+            oops_page = f.read()
+        return Response(oops_page, media_type= "text/html")
